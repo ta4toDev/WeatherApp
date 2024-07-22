@@ -1,19 +1,70 @@
 <script>
+import axios from 'axios';
+
 export default {
-  
+  data() {
+    return {
+      city:"",
+      error:"",
+      info: null
+    }
+  },
+  computed: {
+    cityName() {
+      return "<<" + this.city + ">>" 
+    },
+    showTemp() {
+      return "Temperature: " + this.info.main.temp
+    },
+     showFeelsLike() {
+      return "Fells like: " + this.info.main.feels_like
+    },
+     showMinTemp() {
+      return "Minimum Temperature: " + this.info.main.temp_min
+    },
+    showMaxTemp() {
+      return "Maximum Temperature: " + this.info.main.temp_max
+    },
+  },
+  methods: {
+    getWeather(){
+        if(this.city.trim().length < 2) {
+          this.error = "need the name of more than one character : ";
+          return false
+        }
+        this.error = ""
+
+        axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${this.city}&units=metric&appid=6f61d436e74b824241bb7eec5a0a51fc`)
+             .then (res => (this.info = res.data))
+    }
+  }
 }
 </script>
 
 <template>
   <div class="wrapper">
     <h1>Weather App</h1>
-    <p>find out the weather in your city</p>
-    <input type="text" placeholder="city name">
-    <button>get the weather</button>
+    <p>find out the weather in {{ city == "" ? "your city" : cityName }} </p>
+    <input type="text" v-model="city" placeholder="city name">
+    <button v-if="city !=''" @click="getWeather()">get the weather</button>
+    <button disabled v-else>enter the name of the city</button>
+    <p class="error">{{ error }}</p>
+
+    <div v-if="info != null">
+      
+      <p>{{ showTemp }}</p>
+      <p>{{ showFeelsLike }}</p>
+      <p>{{ showMinTemp }}</p>
+      <p>{{ showMaxTemp }}</p>
+    </div>
   </div>
 </template>
 
 <style scoped>
+
+.error {
+color: red;
+}
 .wrapper {
   width: 900px;
   height: 500px;
@@ -54,5 +105,9 @@ export default {
 }
 .wrapper button:hover {
   transform: scale(1.1) translateY(-5x);
+}
+.wrapper button:disabled {
+  background: #aa871f;
+  cursor: not-allowed;
 }
 </style>
